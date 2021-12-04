@@ -2,6 +2,6 @@
 #include "days.hpp"
 
 int main() {
-    unsigned int day = 3;
+    unsigned int day = 0;
     solve(day);
 }

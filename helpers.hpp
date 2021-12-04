@@ -12,6 +12,7 @@
 
 class Tokens {
     std::vector<std::string> _tokens;
+    std::string _rawLine;
     
 public:
     Tokens(std::string str, std::string delims);
@@ -20,8 +21,18 @@ public:
     long to_long(int pos) const;
     double to_double(int pos) const;
     void show() const;
+    std::string getRawLine() const;
 };
 
 std::vector<Tokens> getInputAsTokens(int fileId = 0, std::string delimiters = " \t");
+
+std::vector<std::vector<int>> permsWithRepetitions(std::size_t length, int default_value, int from_value, int to_value);
+
+unsigned long long getSum(std::vector<int> const& v);
+std::vector<int> getIota(std::size_t length);
+std::vector<char> getAlphabet(char* chars, std::size_t size);
+unsigned long long n_choose_k(long N, long K);
+std::vector<std::string> tokenize(std::string str, std::string delims);
+using namespace std;
 
 #endif /* helpers_hpp */

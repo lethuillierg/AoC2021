@@ -211,13 +211,174 @@ void day3() {
 // -------------------- DAY 4 --------------------
 
 void day4() {
+    // Common
+    const auto markedValue = -1; // semaphore
     
+    auto showBoard = [](std::vector<std::vector<long>> const& b) {
+        for(auto i = 0; i < b.size(); ++i) {
+            for(auto j = 0; j < b[i].size(); ++j) {
+                std::cout << b[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+    };
+    
+    auto wins = [&](std::vector<std::vector<long>> const& board) {
+        unsigned int x, y;
+        for(auto i = 0; i < 5; ++i) {
+            x = 0; y = 0;
+            for(auto j = 0; j < 5; ++j) {
+                if (board[i][j] == markedValue)
+                    ++x;
+                
+                if (board[j][i] == markedValue)
+                    ++y;
+            }
+            
+            if (x == 5 || y == 5) {
+                //std::cout << "Winning board" << std::endl;
+                //showBoard(board);
+                //std::cout << std::endl;
+                
+                return true;
+            }
+        }
+        return false;
+    };
+    
+    auto markBoard = [](std::vector<std::vector<long>>& board, long calledNumber) {
+        for(auto& rows : board)
+            for(auto& n : rows)
+                if (n == calledNumber)
+                    n = -1;
+    };
+    
+    auto sumUmarked = [](std::vector<std::vector<long>> const& board) {
+        long acc = 0;
+        
+        for(auto& rows : board)
+            for(auto& n : rows)
+                if (n != markedValue)
+                    acc += n;
+        
+        return acc;
+    };
+    
+    std::vector<int> calledNumbers;
+    std::map<int, std::vector<std::vector<long>>> boards;
+    
+    int i = 0, j = 0;
+    for(auto const& line : lines) {
+        auto l = line.getRawLine();
+        
+        // called numbers
+        if (i == 0) {
+            for(auto n : tokenize(l, ","))
+                calledNumbers.emplace_back(std::stoi(n));
+        }
+        
+        else if (l == "")
+            continue;
+        
+        // get boards
+        else {
+                std::vector<long> boardRow {
+                    line.to_long(0),
+                    line.to_long(1),
+                    line.to_long(2),
+                    line.to_long(3),
+                    line.to_long(4),
+
+                };
+
+                boards[j].emplace_back(boardRow);
+            
+                if (i % 5 == 0)
+                    ++j;
+            }
+        
+        ++i;
+    }
+    
+    auto winningNumber = 0;
+    auto winningSum = 0L;
+    
+    separator("Day4:A");
+
+    // identify winner
+    for(auto n : calledNumbers) {
+        if (winningSum > 0) break;
+
+        for(auto& b : boards) {
+            auto& board = b.second;
+            markBoard(board, n);
+            
+            if (wins(board)) {
+                winningNumber = n;
+                winningSum = sumUmarked(board);
+            }
+        }
+    }
+    
+    std::cout << winningNumber * winningSum << std::endl;
+    
+    // Part Two
+    separator("Day4:B");
+    
+    std::vector<int> winningBoards;
+    winningNumber = 0;
+    winningSum = 0L;
+
+    for(auto d : calledNumbers) {
+        if (winningSum > 0) break;
+        
+        // mark
+        for(auto& b : boards) {
+            auto& boardId = b.first;
+            auto& board = b.second;
+            
+            markBoard(board, d);
+            
+            if (wins(board) && winningSum == 0) {
+                if (std::find(winningBoards.begin(), winningBoards.end(), boardId)
+                    == winningBoards.end()
+                    ) {
+                    winningBoards.emplace_back(boardId);
+                }
+                
+                // all boards are winners:
+                if (winningBoards.size() == boards.size()) {
+                    winningNumber = d;
+                    auto& lastWinningBoard = boards[winningBoards.back()];
+                    winningSum = sumUmarked(lastWinningBoard);
+                }
+            }
+        }
+    }
+    
+    std::cout << winningNumber * winningSum << std::endl;
+}
+
+// -------------------- DAY 5 --------------------
+
+void day5() {
+}
+
+// -------------------- CURRENT DAY --------------------
+
+void today() {
+    for(auto const& line : lines) {
+        // auto x = line.to_string(0);
+    }
 }
 
 void solve(unsigned int day) {
     getInputTokens(day);
     
     switch(day) {
+        case 0:
+            today(); // CURRENT DAY
+            break;
         case 1:
             day1();
             break;
@@ -229,6 +390,9 @@ void solve(unsigned int day) {
             break;
         case 4:
             day4();
+            break;
+        case 5:
+            day5();
             break;
         default:
             std::cerr << "Day not implemented (" << std::to_string(day) << ")" << std::endl;
