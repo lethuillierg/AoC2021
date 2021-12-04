@@ -264,7 +264,7 @@ void day4() {
         return acc;
     };
     
-    std::vector<int> calledNumbers;
+    std::vector<int> pickedNumbers;
     std::map<int, std::vector<std::vector<long>>> boards;
     
     int i = 0, j = 0;
@@ -274,7 +274,7 @@ void day4() {
         // called numbers
         if (i == 0) {
             for(auto n : tokenize(l, ","))
-                calledNumbers.emplace_back(std::stoi(n));
+                pickedNumbers.emplace_back(std::stoi(n));
         }
         
         else if (l == "")
@@ -306,7 +306,7 @@ void day4() {
     separator("Day4:A");
 
     // identify winner
-    for(auto n : calledNumbers) {
+    for(auto n : pickedNumbers) {
         if (winningSum > 0) break;
 
         for(auto& b : boards) {
@@ -329,7 +329,7 @@ void day4() {
     winningNumber = 0;
     winningSum = 0L;
 
-    for(auto d : calledNumbers) {
+    for(auto n : pickedNumbers) {
         if (winningSum > 0) break;
         
         // mark
@@ -337,7 +337,7 @@ void day4() {
             auto& boardId = b.first;
             auto& board = b.second;
             
-            markBoard(board, d);
+            markBoard(board, n);
             
             if (wins(board) && winningSum == 0) {
                 if (std::find(winningBoards.begin(), winningBoards.end(), boardId)
@@ -348,7 +348,7 @@ void day4() {
                 
                 // all boards are winners:
                 if (winningBoards.size() == boards.size()) {
-                    winningNumber = d;
+                    winningNumber = n;
                     auto& lastWinningBoard = boards[winningBoards.back()];
                     winningSum = sumUmarked(lastWinningBoard);
                 }
