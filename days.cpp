@@ -362,14 +362,150 @@ void day4() {
 // -------------------- DAY 5 --------------------
 
 void day5() {
+    // common
+    class Path {
+        Point _A, _B;
+        
+    public:
+        Path(Point A, Point B) {
+            _A = A;
+            _B = B;
+            
+            // ensure that point A.x <= point B.x
+            if (_A.x > _B.x || (_A.x == _B.x && _A.y > _B.y)) {
+                std::swap(_A, _B);
+            }
+        }
+        
+        Point getPointA() const {
+            return _A;
+        }
+        
+        Point getPointB() const {
+            return _B;
+        }
+        
+        bool isDiagonal() const {
+            return _A.x != _B.x && _A.y != _B.y;
+        }
+        
+        std::vector<Point> getPath() const {
+            std::vector<Point> path;
+            std::vector<long> xs, ys;
+            
+            auto topToBottom = (_A.y <= _B.y) ? true : false;
+            
+            // vertical
+            if (_A.y == _B.y) {
+                for(auto x = _A.x; x <= _B.x; ++x) {
+                    xs.emplace_back(x);
+                    ys.emplace_back(_A.y);
+                }
+            }
+            // horizontal
+            else if (_A.x == _B.x) {
+                if (topToBottom)
+                    for(auto y = _A.y; y <= _B.y; ++y) {
+                        xs.emplace_back(_A.x);
+                        ys.emplace_back(y);
+                    }
+                else
+                    for(auto y = _A.y; y >= _B.y; --y) {
+                        xs.emplace_back(_A.x);
+                        ys.emplace_back(y);
+                    }
+            }
+            // diagonal
+            else {
+                for(auto x = _A.x; x <= _B.x; ++x)
+                    xs.emplace_back(x);
+                
+                if (topToBottom)
+                    for(auto y = _A.y; y <= _B.y; ++y)
+                        ys.emplace_back(y);
+                else
+                    for(auto y = _A.y; y >= _B.y; --y)
+                        ys.emplace_back(y);
+            }
+                        
+            for(auto i = 0; i < xs.size(); ++i)
+                path.emplace_back(Point(xs[i], ys[i]));
+            
+            return path;
+        }
+    };
+    
+    std::vector<Path> paths;
+    for(auto const& line : lines) {
+        auto l = line.regex("(\\d+),(\\d+) -> (\\d+),(\\d+)");
+        
+        Point A(std::stol(l.at(0)), std::stol(l.at(1)));
+        Point B(std::stol(l.at(2)), std::stol(l.at(3)));
+        
+        paths.emplace_back(A, B);
+    }
+    
+    // get matrix size
+    auto max_x = 0L, max_y = 0L;
+    for(auto const& path : paths) {
+        auto x = std::max(path.getPointA().x, path.getPointB().x);
+        auto y = std::max(path.getPointA().y, path.getPointB().y);
+        if (x > max_x) max_x = x;
+        if (y > max_y) max_y = y;
+    }
+    
+    max_x += 1;
+    max_y += 1;
+    
+    Matrix matrix(max_x, max_y);
+    
+    // Part One
+    separator("Day4:A");
+    
+    for(auto const& path : paths) {
+        if (!path.isDiagonal()) {
+            for(auto const& point : path.getPath()) {
+                matrix.increment(point.x, point.y);
+            }
+        }
+    }
+        
+    auto overlaps = 0;
+    
+    for(auto x = 0; x < matrix.getSizeX(); ++x)
+        for(auto y = 0; y < matrix.getSizeY(); ++y) {
+            if (matrix.getValue(x, y) > 1)
+                ++overlaps;
+        }
+    
+    std::cout << overlaps << std::endl;
+    
+    // Part Two
+    separator("Day4:B");
+    
+    matrix.clear();
+    
+    for(auto const& path : paths) {
+        for(auto const& point : path.getPath()) {
+            matrix.increment(point.x, point.y);
+        }
+    }
+    
+    overlaps = 0;
+    
+    for(auto x = 0; x < matrix.getSizeX(); ++x)
+        for(auto y = 0; y < matrix.getSizeY(); ++y)
+            if (matrix.getValue(x, y) > 1)
+                ++overlaps;
+    
+    std::cout << overlaps << std::endl;
 }
 
 // -------------------- CURRENT DAY --------------------
 
+
 void today() {
-    for(auto const& line : lines) {
-        // auto x = line.to_string(0);
-    }
+    
 }
 
 void solve(unsigned int day) {
