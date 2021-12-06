@@ -21,7 +21,7 @@ void day1() {
     }
     
     // Part One
-    separator("Day1:A");
+    separator("Day 1:A");
     
     auto solution1 = 0;
     
@@ -40,7 +40,7 @@ void day1() {
     std::cout << solution1 << std::endl;
     
     // Part Two
-    separator("Day1:B");
+    separator("Day 1:B");
 
     auto windowSize = 3;
     auto solution2 = 0;
@@ -70,7 +70,7 @@ void day2() {
     }
     
     // Part One
-    separator("Day2:A");
+    separator("Day 2:A");
     
     auto horizontal = 0, depth1 = 0, depth2 = 0, aim = 0;
 
@@ -95,7 +95,7 @@ void day2() {
     std::cout << solution1 << std::endl;
     
     // Part Two
-    separator("Day2:B");
+    separator("Day 2:B");
     
     auto solution2 = horizontal * depth2;
     std::cout << solution2 << std::endl;
@@ -117,7 +117,7 @@ void day3() {
     auto bitsLength = reports[0].size();
     
     // Part One
-    separator("Day3:A");
+    separator("Day 3:A");
     
     std::vector<int> bitsCount(bitsLength, 0);
     for(auto const& report : reports) {
@@ -145,7 +145,7 @@ void day3() {
     std::cout << solution1 << std::endl;
 
     // Part Two
-    separator("Day3:B");
+    separator("Day 3:B");
     
     auto bitSetCount = 0;
     char criterion;
@@ -303,7 +303,7 @@ void day4() {
     auto winningNumber = 0;
     auto winningSum = 0L;
     
-    separator("Day4:A");
+    separator("Day 4:A");
 
     // identify winner
     for(auto n : pickedNumbers) {
@@ -323,7 +323,7 @@ void day4() {
     std::cout << winningNumber * winningSum << std::endl;
     
     // Part Two
-    separator("Day4:B");
+    separator("Day 4:B");
     
     std::vector<int> winningBoards;
     winningNumber = 0;
@@ -460,7 +460,7 @@ void day5() {
     Matrix matrix(max_x, max_y);
     
     // Part One
-    separator("Day4:A");
+    separator("Day 5:A");
     
     for(auto const& path : paths) {
         if (!path.isDiagonal()) {
@@ -481,7 +481,7 @@ void day5() {
     std::cout << overlaps << std::endl;
     
     // Part Two
-    separator("Day4:B");
+    separator("Day 5:B");
     
     matrix.clear();
     
@@ -501,11 +501,106 @@ void day5() {
     std::cout << overlaps << std::endl;
 }
 
+// -------------------- DAY 6 --------------------
+
+void day6() {
+    std::vector<std::string> timers;
+    for(auto const& line : lines) {
+        auto l = line.getRawLine();
+        timers = tokenize(l, ",");
+    }
+    
+    // Part One
+    separator("Day 6:A");
+    
+    // Naive and unoptimized solution that only
+    // works for a small number of days:
+    // count the fishes
+    
+    class Lanternfish {
+        int _timer;
+        
+    public:
+        Lanternfish(std::string state) {
+            _timer = std::stoi(state);
+        }
+        
+        void newDay() {
+            --_timer;
+            
+            if (_timer < 0) {
+                _timer = 6;
+            }
+        }
+        
+        int getTimer() const {
+            return _timer;
+        }
+    };
+    
+    std::vector<Lanternfish> ls;
+    for(auto timer : timers)
+        ls.emplace_back(Lanternfish(timer));
+    
+    unsigned long long newFishes = 0;
+    for(auto day = 0; day < 80; ++day) {
+        newFishes = 0;
+        for(auto& l : ls) {
+            if (l.getTimer() == 0) {
+                ++newFishes;
+            }
+            l.newDay();
+        }
+        
+        for(auto i = 0; i < newFishes; ++i) {
+            Lanternfish l("8");
+            ls.emplace_back(l);
+        }
+    }
+    
+    std::cout << ls.size() << std::endl;
+    
+    // Part Two
+    separator("Day 6:B");
+    
+    // More optimized approach:
+    // count the timers
+    
+    std::map<int, unsigned long long> fishes;
+    
+    for(auto timer : timers)
+        ++fishes[std::stoi(timer)];
+        
+    for(auto day = 0; day < 256; ++day) {
+        newFishes = fishes[0];
+        
+        // new day: rotation
+        // 8s -> 7s, 7s -> 6s, etc.
+        for(auto i = 0; i < 8; ++i)
+            fishes[i] = fishes[i + 1];
+        
+        // 6: existing lanterfishes + the ones they generated
+        fishes[6] += newFishes;
+        
+        // 8: new lanternfishes
+        fishes[8] = newFishes;
+    }
+    
+    unsigned long long total = 0;
+    for(auto f : fishes)
+        total += f.second;
+    
+    std::cout << total << std::endl;
+}
+
 // -------------------- CURRENT DAY --------------------
 
-
 void today() {
-    
+    for(auto const& line : lines) {
+        // auto l = line.to_long(0);
+        // auto l = line.getRawLine();
+        // auto l = line.regex("(\\d+),(\\d+) -> (\\d+),(\\d+)");
+    }
 }
 
 void solve(unsigned int day) {
@@ -528,6 +623,12 @@ void solve(unsigned int day) {
             day4();
             break;
         case 5:
+            day5();
+            break;
+        case 6:
+            day6();
+            break;
+        case 7:
             day5();
             break;
         default:
