@@ -542,7 +542,7 @@ void day6() {
     for(auto timer : timers)
         ls.emplace_back(Lanternfish(timer));
     
-    unsigned long long newFishes = 0;
+    ull newFishes = 0;
     for(auto day = 0; day < 80; ++day) {
         newFishes = 0;
         for(auto& l : ls) {
@@ -566,7 +566,7 @@ void day6() {
     // More optimized approach:
     // count the timers
     
-    std::map<int, unsigned long long> fishes;
+    std::map<int, ull> fishes;
     
     for(auto timer : timers)
         ++fishes[std::stoi(timer)];
@@ -586,11 +586,51 @@ void day6() {
         fishes[8] = newFishes;
     }
     
-    unsigned long long total = 0;
+    ull total = 0;
     for(auto f : fishes)
         total += f.second;
     
     std::cout << total << std::endl;
+}
+
+// -------------------- DAY 7 --------------------
+void day7() {
+    std::vector<ull> pos;
+    for(auto const& line : lines) {
+        auto l = line.getRawLine();
+        pos = tokenizeAsULL(l, ",");
+    }
+    
+    ull totalFuel1, totalFuel2;
+    ull min1 = std::numeric_limits<ull>::max(), min2 = min1;
+    
+    for(auto alignPos = 0; alignPos < pos.size(); ++alignPos) {
+        totalFuel1 = 0; totalFuel2 = 0;
+        
+        for(auto i = 0; i < pos.size(); ++i) {
+            ull steps = llabs(alignPos - (long long)pos[i]);
+            totalFuel1 += steps;
+            
+            for(auto fuel = 1; fuel <= steps; ++fuel)
+                totalFuel2 += fuel;
+        }
+        
+        if (totalFuel1 < min1)
+            min1 = totalFuel1;
+
+        if (totalFuel2 < min2)
+            min2 = totalFuel2;
+    }
+    
+    // Part One
+    separator("Day 7:A");
+    
+    std::cout << min1 << std::endl;
+    
+    // Part One
+    separator("Day 7:B");
+    
+    std::cout << min2 << std::endl;
 }
 
 // -------------------- CURRENT DAY --------------------
@@ -599,8 +639,14 @@ void today() {
     for(auto const& line : lines) {
         // auto l = line.to_long(0);
         // auto l = line.getRawLine();
-        // auto l = line.regex("(\\d+),(\\d+) -> (\\d+),(\\d+)");
+        // auto x = tokenizeAsULL(l, ",");
     }
+    
+    // Part One
+    separator("Day 8:A");
+    
+    // Part Two
+    separator("Day 8:A");
 }
 
 void solve(unsigned int day) {
@@ -629,7 +675,10 @@ void solve(unsigned int day) {
             day6();
             break;
         case 7:
-            day5();
+            day7();
+            break;
+        case 8:
+            day8();
             break;
         default:
             std::cerr << "Day not implemented (" << std::to_string(day) << ")" << std::endl;

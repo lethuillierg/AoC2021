@@ -1,6 +1,8 @@
 #ifndef helpers_hpp
 #define helpers_hpp
 
+#include <stdlib.h>
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -10,6 +12,9 @@
 #include <numeric>
 #include <map>
 #include <regex>
+
+using ll = long long;
+using ull = unsigned long long;
 
 class Tokens {
     std::vector<std::string> _tokens;
@@ -97,6 +102,7 @@ std::vector<int> getIota(std::size_t length);
 std::vector<char> getAlphabet(char* chars, std::size_t size);
 unsigned long long n_choose_k(long N, long K);
 std::vector<std::string> tokenize(std::string str, std::string delims);
+std::vector<ull> tokenizeAsULL(std::string str, std::string delims);
 using namespace std;
 
 

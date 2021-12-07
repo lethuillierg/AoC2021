@@ -70,6 +70,28 @@ std::vector<std::string> tokenize(std::string str, std::string delimiters) {
     return tokens;
 }
 
+std::vector<ull> tokenizeAsULL(std::string str, std::string delimiters) {
+    std::vector<ull> tokens;
+    std::size_t i, j = 0;
+    while ((i = str.find_first_not_of(delimiters, j)) != std::string::npos) {
+        j = str.find_first_of(delimiters, i + 1);
+        tokens.emplace_back(std::stoull(str.substr(i, j - i)));
+    }
+    
+    return tokens;
+}
+
+std::vector<ll> tokenizeAsLL(std::string str, std::string delimiters) {
+    std::vector<ll> tokens;
+    std::size_t i, j = 0;
+    while ((i = str.find_first_not_of(delimiters, j)) != std::string::npos) {
+        j = str.find_first_of(delimiters, i + 1);
+        tokens.emplace_back(std::stoll(str.substr(i, j - i)));
+    }
+    
+    return tokens;
+}
+
 std::vector<Tokens> getInputAsTokens(int fileId, std::string delimiters) {
     std::string filepath = "/usr/local/advent/";
 
