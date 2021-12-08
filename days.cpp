@@ -594,6 +594,7 @@ void day6() {
 }
 
 // -------------------- DAY 7 --------------------
+
 void day7() {
     std::vector<ull> pos;
     for(auto const& line : lines) {
@@ -633,20 +634,133 @@ void day7() {
     std::cout << min2 << std::endl;
 }
 
-// -------------------- CURRENT DAY --------------------
+// -------------------- DAY 8 --------------------
 
-void today() {
+void day8() {
+    std::vector<
+        std::pair<
+            std::vector<std::string>, std::vector<std::string>
+        >
+    > randomizedSegments;
+    
     for(auto const& line : lines) {
-        // auto l = line.to_long(0);
-        // auto l = line.getRawLine();
-        // auto x = tokenizeAsULL(l, ",");
+        auto allDisplays = tokenize(line.getRawLine(), "|");
+        auto L = tokenize(allDisplays[0], " ");
+        auto R = tokenize(allDisplays[1], " ");
+        randomizedSegments.emplace_back(std::make_pair(L, R));
     }
     
+    std::map<std::string, int> segmentsType;
+    
+    segmentsType["abcefg"]    = 0;
+    segmentsType["cf"]        = 1;
+    segmentsType["acdeg"]     = 2;
+    segmentsType["acdfg"]     = 3;
+    segmentsType["bcdf"]      = 4;
+    segmentsType["abdfg"]     = 5;
+    segmentsType["abdefg"]    = 6;
+    segmentsType["acf"]       = 7;
+    segmentsType["abcdefg"]   = 8;
+    segmentsType["abcdfg"]    = 9;
+
     // Part One
     separator("Day 8:A");
     
+    auto total1 = 0;
+
+    for(auto const& rs : randomizedSegments) {
+        for(auto const& segmentR : rs.second) {
+            auto size = segmentR.size();
+            
+            // identify numbers by counting the segments
+            if (size == 2 || size == 4 || size == 3 || size == 7)
+                ++total1;
+        }
+    }
+    
+    std::cout << total1 << std::endl;
+
     // Part Two
-    separator("Day 8:A");
+    separator("Day 8:B");
+    
+    // first, sort the segments types
+    for(auto& rs : randomizedSegments) {
+        for(auto& segmentL : rs.first)
+            std::sort(std::begin(segmentL), std::end(segmentL));
+        
+        for(auto& segmentR : rs.second)
+            std::sort(std::begin(segmentR), std::end(segmentR));
+    }
+    
+    // to decode, use a monoalphabetic substitution char -> char
+    std::map<char, char> decoder;
+    std::string alpha1 = "abcdefg";
+    std::string alpha2;
+      
+    ull total2 = 0;
+    ull matches = 0;
+    
+    auto reorderSegments = [&](std::string shuffledSegment) {
+        std::string segments = "";
+        for(auto i = 0; i < shuffledSegment.size(); ++i)
+            segments += decoder[shuffledSegment[i]];
+        
+        // important: sort the reordered segments to allow the comparison
+        std::sort(std::begin(segments), std::end(segments));
+        
+        return segments;
+    };
+    
+    for(auto const& segments : randomizedSegments) {
+        alpha2 = alpha1; // start with no substitution at all: a -> a, etc.
+        
+        do {
+            // setup the decoder using the current permutation of alpha2
+            for(auto i = 0; i < alpha1.size(); ++i)
+                decoder[alpha1[i]] = alpha2[i];
+            
+            matches = 0;
+            
+            // use the segments on the left to perform the analysis
+            for(auto const& segmentL : segments.first) {
+                
+                auto reorderedSegments = reorderSegments(segmentL);
+                    
+                if (segmentsType.find(reorderedSegments) != segmentsType.end())
+                    ++matches;
+                else
+                    break;
+                
+                // when a solution is found for this row of segment...
+                if (matches == segments.first.size()) {
+                    
+                    // debug
+                    std::cout << "Substitution for ";
+                    for(auto s : segments.first)
+                        std::cout << s << " ";
+                    std::cout << "=> " << alpha1 << " <> " << alpha2 << std::endl;
+                    
+                    // ... reorder the segments on the right
+                    std::string number = "";
+                    for(auto const& segmentR : segments.second) {
+                        auto reorderedSegments = reorderSegments(segmentR);
+                        number += std::to_string(segmentsType[reorderedSegments]);
+                    }
+                    
+                    total2 += std::stoi(number);
+                }
+            }
+            
+        } while(std::next_permutation(std::begin(alpha2), std::end(alpha2)));
+    }
+
+    std::cout << total2 << std::endl;
+}
+
+// -------------------- CURRENT DAY --------------------
+
+void today() {
+    
 }
 
 void solve(unsigned int day) {
