@@ -36,6 +36,14 @@ struct Point {
     
     Point() : x(0), y(0) {}
     Point(long a, long b) : x(a), y(b) {}
+    
+    void show() const {
+        std::cout << x << "." << y << std::endl;
+    }
+    
+    bool operator<(const Point& point) const {
+        return std::tie(x, y) < std::tie(point.x, point.y);
+    }
 };
 
 class Matrix {
@@ -49,10 +57,10 @@ public:
         
         _elements.reserve(size_y);
         
-        std::vector<int> columns(size_y, 0);
+        std::vector<int> rows(size_x, 0);
         
-        for(auto x = 0; x < size_x; ++x)
-            _elements.emplace_back(columns);
+        for(auto y = 0; y < size_y; ++y)
+            _elements.emplace_back(rows);
     }
     
     std::size_t getSizeX() const {
@@ -64,21 +72,21 @@ public:
     }
     
     void increment(std::size_t x, std::size_t y) {
-        ++_elements[x][y];
+        ++_elements[y][x];
     }
     
     void setValue(std::size_t x, std::size_t y, int value) {
-        _elements[x][y] = value;
+        _elements[y][x] = value;
     }
     
     int getValue(std::size_t x, std::size_t y) const {
-        return _elements[x][y];
+        return _elements[y][x];
     }
     
     void show() const {
-        for(auto x = 0; x < _size_x; ++x) {
-            for(auto y = 0; y < _size_y; ++y) {
-                std::cout << _elements[x][y] << " ";
+        for(auto y = 0; y < _size_y; ++y) {
+            for(auto x = 0; x < _size_x; ++x) {
+                std::cout << _elements[y][x] << " ";
             }
             std::cout << std::endl;
         }
@@ -87,9 +95,34 @@ public:
     void clear() {
         for(auto x = 0; x < _size_x; ++x) {
             for(auto y = 0; y < _size_y; ++y) {
-                _elements[x][y] = 0;
+                _elements[y][x] = 0;
             }
         }
+    }
+    
+    // get North, South, East, and West neighbors
+    std::vector<std::pair<Point, int>> getFourNeighbors(std::size_t x, std::size_t y) const {
+        std::vector<
+            std::pair<Point, int>
+        > neighbors;
+        
+        // north
+        if (y > 0)
+            neighbors.emplace_back(std::make_pair(Point(x, y - 1), _elements[y - 1][x]));
+        
+        // right
+        if (x < _size_x - 1)
+            neighbors.emplace_back(std::make_pair(Point(x + 1, y), _elements[y][x + 1]));
+
+        // left
+        if (x > 0)
+            neighbors.emplace_back(std::make_pair(Point(x - 1, y), _elements[y][x - 1]));
+
+        // bottom
+        if (y < _size_y - 1)
+            neighbors.emplace_back(std::make_pair(Point(x, y + 1), _elements[y + 1][x]));
+                                   
+        return neighbors;
     }
 };
 
@@ -103,7 +136,6 @@ std::vector<char> getAlphabet(char* chars, std::size_t size);
 unsigned long long n_choose_k(long N, long K);
 std::vector<std::string> tokenize(std::string str, std::string delims);
 std::vector<ull> tokenizeAsULL(std::string str, std::string delims);
-using namespace std;
 
 
 #endif /* helpers_hpp */

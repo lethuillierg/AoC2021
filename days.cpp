@@ -757,10 +757,268 @@ void day8() {
     std::cout << total2 << std::endl;
 }
 
+// -------------------- DAY 9 --------------------
+
+//DEBUG
+void print_map(std::map<Point, bool> &m) {
+    for (auto const &pair: m) {
+        std::cout << "    {" << pair.first.x << "." << pair.first.y << ": " << pair.second << "}\n";
+    }
+}
+
+void day9() {
+    std::vector<std::string> ls;
+    for(auto const& line : lines) {
+        ls.emplace_back(line.getRawLine());
+    }
+    
+    Matrix heightmap(ls[0].size(), ls.size());
+    
+    for(auto i = 0; i < heightmap.getSizeX(); ++i) {
+        for(auto j = 0; j < heightmap.getSizeY(); ++j) {
+            heightmap.setValue(i, j, ls[j][i] - '0');
+        }
+    }
+    
+    heightmap.show();
+    
+    // Part One
+    separator("Day 9:A");
+    
+    ull riskLevel = 0;
+    bool isLow = true;
+    auto currentValue = 0;
+    for(auto i = 0; i < heightmap.getSizeX(); ++i) {
+        for(auto j = 0; j < heightmap.getSizeY(); ++j) {
+            
+            isLow = true;
+            currentValue = heightmap.getValue(i, j);
+            auto neighbors = heightmap.getFourNeighbors(i, j);
+            
+            for(auto const& neighbor : neighbors) {
+                if (currentValue >= neighbor.second) {
+                    isLow = false;
+                    break;
+                }
+            }
+            
+            if (isLow)
+                riskLevel += currentValue + 1;
+        }
+    }
+    
+    std::cout << riskLevel << std::endl;
+    
+    // Part Two
+    separator("Day 9:B");
+
+    // keep track of locations belonging to a basin
+    std::map<Point, bool> belongingToBasin;
+    
+    // ignore locations based on their characteristics
+    auto ignoreLocation = [&](Point const& location) {
+        // > Locations of height 9 do not count as being in any basin
+        if (heightmap.getValue(location.x, location.y) == 9)
+            return true;
+        
+        // ignore locations already explored
+        if (belongingToBasin.find(Point(location.x, location.y)) != belongingToBasin.end())
+            return true;
+        
+        return false;
+    };
+
+    std::vector<std::vector<Point>> basins;
+    std::stack<Point> toExplore;
+    
+    for(auto i = 0; i < heightmap.getSizeX(); ++i) {
+        for(auto j = 0; j < heightmap.getSizeY(); ++j) {
+            
+            if (ignoreLocation(Point(i, j)))
+                continue;
+            
+            toExplore.push(Point(i, j));
+            std::vector<Point> currentBasin;
+                        
+            // explore from current position
+            while(!toExplore.empty()) {
+                auto current = toExplore.top();
+                toExplore.pop();
+                
+                Point currentLocation(current.x, current.y);
+                
+                if (ignoreLocation(currentLocation))
+                    continue;
+                                
+                currentBasin.emplace_back(currentLocation);
+                
+                // memorize this location to prevent exploring it in the future
+                belongingToBasin[currentLocation] = true;
+                            
+                for(auto const& neighbor : heightmap.getFourNeighbors(current.x, current.y))
+                    toExplore.push(Point(neighbor.first.x, neighbor.first.y));
+            }
+                        
+            basins.emplace_back(currentBasin);
+        }
+    }
+    
+    // sort basins by size
+    std::sort(std::begin(basins), std::end(basins),
+              [] (std::vector<Point> const& a,  std::vector<Point> const &b) {
+                  return a.size() > b.size();
+              });
+    
+    ull total = 1;
+    for(auto i = 0; i < 3; ++i)
+        total *= basins[i].size();
+    
+    std::cout << total << std::endl;
+}
+
+// -------------------- DAY 10 --------------------
+
+void day10() {
+    std::vector<std::string> ls;
+    for(auto const& line : lines) {
+        ls.emplace_back(line.getRawLine());
+    }
+    
+    auto getMatchingChunk = [](char c) {
+        if (c == '(') return ')';
+        if (c == ')') return '(';
+        if (c == '[') return ']';
+        if (c == ']') return '[';
+        if (c == '{') return '}';
+        if (c == '}') return '{';
+        if (c == '<') return '>';
+        if (c == '>') return '<';
+        
+        return c;
+    };
+   
+    separator("Day 10:A");
+    
+    // classic brackets matching algorithm
+    auto isCorrupted = [&](std::string chunks, char sentinelChar) {
+        std::stack<char> ch;
+        for(auto c : chunks) {
+            switch(c) {
+                case '(':
+                case '[':
+                case '{':
+                case '<':
+                    ch.push(c);
+                    break;
+            }
+            
+            if (ch.empty()) {
+                return sentinelChar;
+            }
+        
+            switch(c) {
+                case ')':
+                case ']':
+                case '}':
+                case '>':
+                    auto x = ch.top();
+                    ch.pop();
+                    if (x != getMatchingChunk(c)) {
+                        return c;
+                    }
+                    break;
+            }
+        }
+        
+        return sentinelChar;
+    };
+    
+    std::vector<std::string> incomplete;
+    std::map<char, int> corruptedPoints;
+    const char sentinelChar = '\0';
+    
+    for(auto chunks : ls) {
+        auto corruptedChar = isCorrupted(chunks, sentinelChar);
+        if (corruptedChar != sentinelChar)
+            ++corruptedPoints[corruptedChar];
+        else
+            incomplete.emplace_back(chunks);
+    }
+    
+    ull total = 0;
+    for(auto c : corruptedPoints) {
+        if (c.first == ')')
+            total += 3 * c.second;
+        if (c.first == ']')
+            total += 57 * c.second;
+        if (c.first == '}')
+            total += 1197 * c.second;
+        if (c.first == '>')
+            total += 25137 * c.second;
+    }
+    
+    std::cout << total << std::endl;
+    
+    separator("Day 10:B");
+    
+    std::vector<std::string> completingParts;
+    for(auto chunks : incomplete) {
+        
+        // delete pairs that are adjacently matching (e.g., '[]')
+        // in order to identify the core incomplete part
+        // (stop when no such pairs exist in the remaining string)
+        auto incompletePart = chunks;
+        while(true) {
+            bool hasBeenErased = false;
+            for(int i = static_cast<int>(incompletePart.size() - 1); i >= 0; --i) {
+                if (incompletePart[i] == getMatchingChunk(incompletePart[i - 1])) {
+                    incompletePart.erase(i, 1);
+                    incompletePart.erase(i - 1, 1);
+                    hasBeenErased = true;
+                }
+            }
+            
+            if (!hasBeenErased)
+                break;
+        }
+        
+        // now that the incomplete part has been identify, mirror it:
+        // - first, by reversing it
+        // - then, by inverting its components (e.g., '[' -> ']')
+        std::reverse(std::begin(incompletePart), std::end(incompletePart));
+        for(auto& c : incompletePart) c = getMatchingChunk(c);
+        
+        completingParts.emplace_back(incompletePart);
+    }
+    
+    // score
+    std::vector<ull> scores;
+    for(auto const& completingPart : completingParts) {
+        ull score = 0;
+        for(auto c : completingPart) {
+            score *= 5;
+            if (c == ')') score += 1;
+            if (c == ']') score += 2;
+            if (c == '}') score += 3;
+            if (c == '>') score += 4;
+        }
+        scores.emplace_back(score);
+    }
+    
+    std::sort(std::begin(scores), std::end(scores));
+    
+    std::cout << scores[scores.size() / 2] << std::endl;
+}
+
 // -------------------- CURRENT DAY --------------------
 
 void today() {
-    
+    std::vector<std::string> ls;
+    for(auto const& line : lines) {
+        ls.emplace_back(line.getRawLine());
+        //auto allDisplays = tokenize(line.getRawLine(), "|");
+        // auto x = line.to_string(0);
+    }
 }
 
 void solve(unsigned int day) {
@@ -793,6 +1051,12 @@ void solve(unsigned int day) {
             break;
         case 8:
             day8();
+            break;
+        case 9:
+            day9();
+            break;
+        case 10:
+            day10();
             break;
         default:
             std::cerr << "Day not implemented (" << std::to_string(day) << ")" << std::endl;
