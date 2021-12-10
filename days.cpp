@@ -759,13 +759,6 @@ void day8() {
 
 // -------------------- DAY 9 --------------------
 
-//DEBUG
-void print_map(std::map<Point, bool> &m) {
-    for (auto const &pair: m) {
-        std::cout << "    {" << pair.first.x << "." << pair.first.y << ": " << pair.second << "}\n";
-    }
-}
-
 void day9() {
     std::vector<std::string> ls;
     for(auto const& line : lines) {
