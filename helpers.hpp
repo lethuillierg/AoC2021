@@ -75,6 +75,14 @@ public:
         ++_elements[y][x];
     }
     
+    void incrementAll() {
+        for(auto x = 0; x < _size_x; ++x) {
+            for(auto y = 0; y < _size_y; ++y) {
+                ++_elements[y][x];
+            }
+        }
+    }
+    
     void setValue(std::size_t x, std::size_t y, int value) {
         _elements[y][x] = value;
     }
@@ -101,7 +109,7 @@ public:
     }
     
     // get North, South, East, and West neighbors
-    std::vector<std::pair<Point, int>> getFourNeighbors(std::size_t x, std::size_t y) const {
+    std::vector<std::pair<Point, int>> getFourNeighbors(int x, int y) const {
         std::vector<
             std::pair<Point, int>
         > neighbors;
@@ -121,6 +129,46 @@ public:
         // bottom
         if (y < _size_y - 1)
             neighbors.emplace_back(std::make_pair(Point(x, y + 1), _elements[y + 1][x]));
+                                   
+        return neighbors;
+    }
+    
+    std::vector<std::pair<Point, int>> getAllNeighbors(int x, int y) const {
+        std::vector<
+            std::pair<Point, int>
+        > neighbors;
+        
+        // north
+        if (y > 0)
+            neighbors.emplace_back(std::make_pair(Point(x, y - 1), _elements[y - 1][x]));
+        
+        // north west
+        if (y > 0 && x > 0)
+            neighbors.emplace_back(std::make_pair(Point(x - 1, y - 1), _elements[y - 1][x - 1]));
+        
+        // north east
+        if (y > 0 && x < _size_x - 1)
+            neighbors.emplace_back(std::make_pair(Point(x + 1, y - 1), _elements[y - 1][x + 1]));
+        
+        // right
+        if (x < _size_x - 1)
+            neighbors.emplace_back(std::make_pair(Point(x + 1, y), _elements[y][x + 1]));
+
+        // left
+        if (x > 0)
+            neighbors.emplace_back(std::make_pair(Point(x - 1, y), _elements[y][x - 1]));
+
+        // south
+        if (y < _size_y - 1)
+            neighbors.emplace_back(std::make_pair(Point(x, y + 1), _elements[y + 1][x]));
+        
+        // south west
+        if (y < _size_y - 1 && x > 0)
+            neighbors.emplace_back(std::make_pair(Point(x - 1, y + 1), _elements[y + 1][x - 1]));
+        
+        // south east
+        if (y < _size_y - 1 && x < _size_x - 1)
+            neighbors.emplace_back(std::make_pair(Point(x + 1, y + 1), _elements[y + 1][x + 1]));
                                    
         return neighbors;
     }

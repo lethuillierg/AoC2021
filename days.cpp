@@ -1003,6 +1003,100 @@ void day10() {
     std::cout << scores[scores.size() / 2] << std::endl;
 }
 
+// -------------------- DAY 11 --------------------
+
+void day11() {
+    std::vector<std::string> ls;
+    for(auto const& line : lines) {
+        ls.emplace_back(line.getRawLine());
+    }
+    
+    Matrix grid(ls[0].size(), ls.size());
+    
+    for(auto i = 0; i < ls[0].size(); ++i)
+        for(auto j = 0; j < ls.size(); ++j)
+            grid.setValue(i, j, ls[j][i] - '0');
+        
+    auto tryToFlash = [](int i, int j, std::map<Point, bool>& flashed, Matrix& grid) {
+        auto value = grid.getValue(i, j);
+        
+        if (value > 9 && flashed.find(Point(i, j)) == flashed.end()) {
+            flashed[Point(i, j)] = true;
+            
+            for(auto neighbor : grid.getAllNeighbors(i, j))
+                grid.increment(neighbor.first.x, neighbor.first.y);
+            
+            return 1;
+        }
+        
+        return 0;
+    };
+    
+    auto areAllFlashing = [](Matrix& grid) {
+        for(auto i = 0; i < grid.getSizeX(); ++i)
+            for(auto j = 0; j < grid.getSizeY(); ++j)
+                if (grid.getValue(i, j) != 0)
+                    return false;
+        
+        return true;
+    };
+    
+    auto performSteps = [&](Matrix grid, int numberOfSteps, bool show = false) {
+        ull totalFlashesCount = 0;
+        auto flashsCount = 0;
+        std::map<Point, bool> flashed;
+        
+        if (numberOfSteps < 0)
+            numberOfSteps = std::numeric_limits<int>::max();
+        
+        // steps start from 1, not 0
+        for(auto steps = 1; steps <= numberOfSteps; ++steps) {
+            flashed.clear();
+            
+            // > First, the energy level of each octopus increases by 1
+            grid.incrementAll();
+            
+            do {
+                
+                flashsCount = 0;
+                
+                // > Then, any octopus with an energy level greater than 9 flashes...
+                for(auto i = 0; i < grid.getSizeX(); ++i)
+                    for(auto j = 0; j < grid.getSizeY(); ++j)
+                        flashsCount += tryToFlash(i, j, flashed, grid);
+                
+                totalFlashesCount += flashsCount;
+                
+            } while(flashsCount > 0);
+            
+            // > Finally, any octopus that flashed during this step has its energy level
+            // > set to 0, as it used all of its energy to flash
+            for(auto i = 0; i < grid.getSizeX(); ++i)
+                for(auto j = 0; j < grid.getSizeY(); ++j)
+                    if (flashed.find(Point(i, j)) != flashed.end())
+                        grid.setValue(i, j, 0);
+            
+            if (show) {
+                std::cout << std::endl << "-- " << steps << " --" << std::endl;
+                grid.show();
+            }
+            
+            if (areAllFlashing(grid))
+                return std::make_pair(totalFlashesCount, steps);
+        }
+        
+        return std::make_pair(totalFlashesCount, numberOfSteps);
+    };
+    
+    separator("Day 11:A");
+    
+    std::cout << performSteps(grid, 100, false).first << std::endl;
+    
+    separator("Day 11:B");
+    
+    std::cout << performSteps(grid, -1, true).second << std::endl;
+}
+
 // -------------------- CURRENT DAY --------------------
 
 void today() {
@@ -1050,6 +1144,9 @@ void solve(unsigned int day) {
             break;
         case 10:
             day10();
+            break;
+        case 11:
+            day11();
             break;
         default:
             std::cerr << "Day not implemented (" << std::to_string(day) << ")" << std::endl;
