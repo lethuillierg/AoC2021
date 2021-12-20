@@ -1,5 +1,10 @@
 #include "helpers.hpp"
 
+const int MAZE_FREE = 0;
+const int MAZE_WALL = 1;
+const int MAZE_PATH = 2;
+
+
 std::vector<std::string> tokenize(std::string str, std::string delims);
 
 Tokens::Tokens(std::string str, std::string delims) {
@@ -173,4 +178,56 @@ unsigned long long n_choose_k(long N, long K) {
         result /= i;
     }
     return result;
+}
+
+bool Solve(Matrix& maze, int x, int y, Point endingPoint, bool silent){
+    // Make the move (if it's wrong, we will backtrack later.
+    maze.setValue(x, y, MAZE_PATH);
+    
+    // Check if we have reached our goal.
+    if (x == endingPoint.x && y == endingPoint.y)
+        return true;
+
+    // Recursively search for our goal.
+    if (x > 0 && maze.getValue(x - 1, y) == MAZE_FREE && Solve(maze, x - 1, y, endingPoint, silent))
+        return true;
+    
+    if (x < maze.getSizeX() && maze.getValue(x + 1, y) == MAZE_FREE && Solve(maze, x + 1, y, endingPoint, silent))
+        return true;
+    
+    if (y > 0 && maze.getValue(x, y - 1) == MAZE_FREE && Solve(maze, x, y - 1, endingPoint, silent))
+        return true;
+    
+    if (y < maze.getSizeY() && maze.getValue(x, y + 1) == MAZE_FREE && Solve(maze, x, y + 1, endingPoint, silent))
+        return true;
+
+    // Otherwise we need to backtrack and find another solution.
+    maze.setValue(x, y, MAZE_FREE);
+
+    // If you want progressive update, uncomment these lines...
+    if (!silent) {
+        std::cout << "- progress -" << std::endl;
+        maze.show();
+        std::cout << std::endl;
+    }
+    return false;
+};
+
+std::vector<Point> solveMaze(Matrix& maze, Point const& startingPoint, Point const& endingPoint, bool silent) {
+    std::vector<Point> solvingPath;
+
+    if (Solve(maze, startingPoint.x, startingPoint.y, endingPoint, silent)) {
+        std::cout << "- SOLUTION -" << std::endl;
+        maze.show();
+        
+        for(auto i = 0; i < maze.getSizeY(); ++i)
+            for(auto j = 0; j < maze.getSizeX(); ++j)
+                if (maze.getValue(i, j) == 2)
+                    solvingPath.emplace_back(Point(i, j));
+    }
+    else {
+        std::cout << "Maze: no solution" << std::endl;
+    }
+    
+    return solvingPath;
 }

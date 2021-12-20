@@ -178,6 +178,8 @@ std::vector<Tokens> getInputAsTokens(int fileId = 0, std::string delimiters = " 
 
 std::vector<std::vector<int>> permsWithRepetitions(std::size_t length, int default_value, int from_value, int to_value);
 
+std::vector<Point> solveMaze(Matrix& maze, Point const& startingPoint, Point const& endingPoint, bool silent = true);
+
 unsigned long long sumVector(std::vector<int> const& v);
 std::vector<int> getIota(std::size_t length);
 std::vector<char> getAlphabet(char* chars, std::size_t size);
@@ -185,5 +187,6 @@ unsigned long long n_choose_k(long N, long K);
 std::vector<std::string> tokenize(std::string str, std::string delims);
 std::vector<ull> tokenizeAsULL(std::string str, std::string delims);
 
+using namespace std;
 
 #endif /* helpers_hpp */
