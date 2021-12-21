@@ -11,6 +11,8 @@
 #include <algorithm>
 #include <numeric>
 #include <map>
+#include <set>
+#include <list>
 #include <regex>
 
 using ll = long long;
@@ -98,6 +100,7 @@ public:
             }
             std::cout << std::endl;
         }
+        std::cout << std::endl;
     }
     
     void clear() {
@@ -137,34 +140,34 @@ public:
         std::vector<
             std::pair<Point, int>
         > neighbors;
-        
-        // north
-        if (y > 0)
-            neighbors.emplace_back(std::make_pair(Point(x, y - 1), _elements[y - 1][x]));
-        
+
         // north west
         if (y > 0 && x > 0)
             neighbors.emplace_back(std::make_pair(Point(x - 1, y - 1), _elements[y - 1][x - 1]));
         
+        // north
+        if (y > 0)
+            neighbors.emplace_back(std::make_pair(Point(x, y - 1), _elements[y - 1][x]));
+    
         // north east
         if (y > 0 && x < _size_x - 1)
             neighbors.emplace_back(std::make_pair(Point(x + 1, y - 1), _elements[y - 1][x + 1]));
         
-        // right
-        if (x < _size_x - 1)
-            neighbors.emplace_back(std::make_pair(Point(x + 1, y), _elements[y][x + 1]));
-
         // left
         if (x > 0)
             neighbors.emplace_back(std::make_pair(Point(x - 1, y), _elements[y][x - 1]));
-
-        // south
-        if (y < _size_y - 1)
-            neighbors.emplace_back(std::make_pair(Point(x, y + 1), _elements[y + 1][x]));
+        
+        // right
+        if (x < _size_x - 1)
+            neighbors.emplace_back(std::make_pair(Point(x + 1, y), _elements[y][x + 1]));
         
         // south west
         if (y < _size_y - 1 && x > 0)
             neighbors.emplace_back(std::make_pair(Point(x - 1, y + 1), _elements[y + 1][x - 1]));
+
+        // south
+        if (y < _size_y - 1)
+            neighbors.emplace_back(std::make_pair(Point(x, y + 1), _elements[y + 1][x]));
         
         // south east
         if (y < _size_y - 1 && x < _size_x - 1)

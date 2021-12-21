@@ -1097,6 +1097,145 @@ void day11() {
     std::cout << performSteps(grid, -1, true).second << std::endl;
 }
 
+// -------------------- DAY 12 --------------------
+
+void day12() {
+    class Graph {
+        std::set<std::string> _vertices;
+        std::map<std::string, std::vector<std::string>> _edges;
+        
+    public:
+        void addEdge(std::string from, std::string to) {
+            _edges[from].emplace_back(to);
+            _edges[to].emplace_back(from);
+            _vertices.insert(from);
+            _vertices.insert(to);
+        }
+        
+        void show() const {
+            for(auto edge : _edges) {
+                for(auto v : edge.second) {
+                    std::cout << edge.first << " <-> " << v << std::endl;
+                }
+            }
+        }
+        
+        std::vector<std::string> getConnectedNodes(std::string node) {
+            return _edges[node];
+        }
+        
+    };
+    
+    Graph graph;
+    for(auto const& line : lines) {
+        auto nodes = tokenize(line.getRawLine(), "-");
+        graph.addEdge(nodes[0], nodes[1]);
+    }
+    
+    graph.show();
+    
+    // TODO (redo the implementation
+}
+
+// -------------------- DAY 20 --------------------
+
+void day20() {
+    
+    std::string imageEnhancementAlgorighm;
+    std::vector<std::string> ls;
+    auto i = 0;
+    for(auto const& line : lines) {
+        if (i == 0) {
+            imageEnhancementAlgorighm = line.getRawLine();
+        }
+        else if (i > 1) {
+            ls.emplace_back(line.getRawLine());
+        }
+        
+        ++i;
+    }
+    
+    auto binaryToInt = [](std::string bin) {
+        return std::stoi(bin, nullptr, 2);
+    };
+    
+    auto offset = 3;
+
+    Matrix matrix(ls[0].size(), ls.size());
+    
+    for(auto i = 0; i < ls[0].size(); ++i)
+        for(auto j = 0; j < ls.size(); ++j)
+            matrix.setValue(i, j, 0);
+    
+    
+    for(auto i = 0; i < ls[0].size(); ++i)
+        for(auto j = 0; j < ls.size(); ++j)
+            if (ls[j][i] == '#')
+                matrix.setValue(i, j, 1);
+    
+    matrix.show();
+    
+    auto generateNewMatrix = [imageEnhancementAlgorighm](Matrix& currentMatrix) {
+
+        // offset
+        auto offset = 3;
+        Matrix offsetMatrix(currentMatrix.getSizeX() + offset * 2, currentMatrix.getSizeY() + offset * 2);
+        
+        for(auto i = 0; i < currentMatrix.getSizeX(); ++i)
+            for(auto j = 0; j < currentMatrix.getSizeY(); ++j)
+                if (currentMatrix.getValue(i, j) == 1)
+                    offsetMatrix.setValue(i + offset, j + offset, 1);
+
+        // enlight
+        Matrix newMatrix(offsetMatrix.getSizeX(), offsetMatrix.getSizeY());
+        
+        for(auto i = 0; i < offsetMatrix.getSizeX(); ++i) {
+            for(auto j = 0; j < offsetMatrix.getSizeY(); ++j) {
+                auto n = offsetMatrix.getAllNeighbors(i, j);
+                
+                if (n.size() == 8) {
+                    std::string binaryNumber = "";
+                    
+                    for(auto i = 0; i < 4; ++i)
+                            binaryNumber += std::to_string(n[i].second);
+                    
+                    binaryNumber += std::to_string(offsetMatrix.getValue(i, j));
+                    
+                    for(auto i = 4; i < 8; ++i)
+                            binaryNumber += std::to_string(n[i].second);
+                    
+                    auto b = std::stoi(binaryNumber, nullptr, 2);
+                    
+                    auto status = imageEnhancementAlgorighm[b];
+                    
+                    if (status == '#')
+                        newMatrix.setValue(i, j, 1);
+                }
+               
+            }
+        }
+        
+        return newMatrix;
+    };
+    
+    auto m2 = generateNewMatrix(matrix);
+    m2.show();
+    
+    auto m3 = generateNewMatrix(m2);
+    m3.show();
+    
+    ull total = 0;
+    for(auto i = 0; i < m3.getSizeX(); ++i)
+        for(auto j = 0; j < m3.getSizeY(); ++j)
+            if (m3.getValue(i, j) == 1)
+                ++total;
+    
+    std::cout << total << std::endl;
+                
+    
+    
+}
+
 // -------------------- CURRENT DAY --------------------
 
 void today() {
@@ -1143,6 +1282,12 @@ void solve(unsigned int day) {
             break;
         case 11:
             day11();
+            break;
+        case 12:
+            day12();
+            break;
+        case 20:
+            day20();
             break;
         default:
             std::cerr << "Day not implemented (" << std::to_string(day) << ")" << std::endl;
